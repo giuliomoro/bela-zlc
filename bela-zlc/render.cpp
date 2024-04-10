@@ -77,12 +77,12 @@ bool setup(BelaContext *context, void *userData)
 	// Load the audio file
 	if (!gPlayer.setup(gAudioFilename))
 	{
-		rt_printf("Error loading audio file '%s'\n", gAudioFilename.c_str());
+		fprintf(stderr, "Error loading audio file '%s'\n", gAudioFilename.c_str());
 		return false;
 	}
 
 	// Print some useful info
-	rt_printf("Loaded the audio file '%s' with %d frames (%.1f seconds)\n",
+	printf("Loaded the audio file '%s' with %d frames (%.1f seconds)\n",
 			  gAudioFilename.c_str(), gPlayer.size(),
 			  gPlayer.size() / context->audioSampleRate);
 

@@ -18,12 +18,12 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 		// Load our impulse response from file
 		if (!impulsePlayer.setup(impulseFilename))
 		{
-			rt_printf("Error loading impulse response file '%s'\n", impulseFilename.c_str());
+			printf("Error loading impulse response file '%s'\n", impulseFilename.c_str());
 			return false;
 		}
 
 		// Print some useful info
-		rt_printf("Loaded the impulse response file '%s' with %d frames (%.1f seconds)\n",
+		printf("Loaded the impulse response file '%s' with %d frames (%.1f seconds)\n",
 				  impulseFilename.c_str(), impulsePlayer.size(),
 				  impulsePlayer.size() / float(audioSampleRate));
 
@@ -86,7 +86,7 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 				fftConvolvers_.push_back(convolver);
 				convolverBufferSamples_.push_back(0);
 				convolverPriority_.push_back(priority);
-				//rt_printf("n: %d  fftSize: %d. priority: %d samplesRead: %d  k: %d\n", blocks_, fftSize, priority, samplesRead, k);
+				//printf("n: %d  fftSize: %d. priority: %d samplesRead: %d  k: %d\n", blocks_, fftSize, priority, samplesRead, k);
 			}
 
 			blocks_++;
@@ -107,7 +107,7 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 				&fftConvolvers_[n]));
 	}
 
-	rt_printf("Splitting impulse into %d blocks.\n", blocks_);
+	printf("Splitting impulse into %d blocks.\n", blocks_);
 
 	return true;
 }
