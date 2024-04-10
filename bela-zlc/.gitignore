@@ -2,3 +2,4 @@
 settings.json
 build/*
 ronn-zlc
+.*.sw?
