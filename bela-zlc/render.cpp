@@ -25,12 +25,13 @@ Lecture 20: Phase vocoder, part 3 fft-robotisation
 MonoFilePlayer gPlayer;
 std::string gAudioFilename = "audio/riff.wav";
 std::vector<std::string> gImpulseFilenames = {
-	"audio/large_room.wav",
+	//"audio/large_room.wav",
 	"audio/drum_room.wav",
 	"audio/studio.wav",
-	"audio/room.wav",
-	"audio/plate.wav",
-	"audio/church.wav"};
+	//"audio/room.wav",
+	//"audio/plate.wav",
+	//"audio/church.wav",
+};
 
 // zero-latency convolvers
 std::vector<ZLConvolver> gConvolvers;
@@ -90,7 +91,7 @@ bool setup(BelaContext *context, void *userData)
 	// Arguments: name, default value, minimum, maximum, increment
 	// store the return value to read from the slider later on
 	gRoomSlider = gGuiController.addSlider("Room", 0.0, 0.0, gImpulseFilenames.size(), 1.0);
-	gMaxBlocksSlider = gGuiController.addSlider("Max blocks", 10.0, 0.0, 30.0, 1.0);
+	gMaxBlocksSlider = gGuiController.addSlider("Max blocks", 30.0, 0.0, 30.0, 1.0);
 	gSparsitySlider = gGuiController.addSlider("Sparsity (%)", 0.0, 0.0, 1.0, 0.1);
 
 	gTanhSlider = gGuiController.addSlider("Tanh (on/off)", 0.0, 0.0, 1.0, 1.0);
