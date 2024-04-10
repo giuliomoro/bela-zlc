@@ -112,7 +112,7 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 	return true;
 }
 
-float ZLConvolver::process(float in, float wet, float dry, bool nl, int maxBlocks, float sparsity)
+float ZLConvolver::process(float in, int maxBlocks, float sparsity)
 {
 	// store input sample into input circular buffer
 	inputBuffer_[inputBufferPointer_++] = in;
@@ -151,13 +151,6 @@ float ZLConvolver::process(float in, float wet, float dry, bool nl, int maxBlock
 	outputBufferReadPointer_++;
 	if (outputBufferReadPointer_ >= bufferSize_)
 		outputBufferReadPointer_ = 0;
-
-	// create the wet/dry mix
-	out = wet * out + dry * in;
-
-	// apply nonlinearity
-	if (nl)
-		out = tanhf_neon(out);
 
 	return out;
 }

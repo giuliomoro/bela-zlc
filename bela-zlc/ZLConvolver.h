@@ -47,7 +47,7 @@ public:
 		return r;
 	}
 	
-	float process(float in, float wet, float dry, bool nl, int maxBlocks, float sparsity);
+	float process(float in, int maxBlocks, float sparsity);
 	
 private:
 	

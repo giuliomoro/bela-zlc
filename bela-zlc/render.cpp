@@ -141,11 +141,14 @@ void render(BelaContext *context, void *userData)
 	{
 
 		float in = gPlayer.process() * inGainLinear;
-		float out = gConvolvers[room].process(in, 1.0, 1.0, nl, maxBlocks, sparsity);
+		float out = gConvolvers[room].process(in, maxBlocks, sparsity);
 		// wet dry mix
 		out = out * wet + in * dry;
 		// scale the output mix
 		out = out * outGainLinear;
+		// apply nonlinearity
+		if(nl)
+			out = tanhf_neon(out);
 		for(unsigned int c = 0; c < context->audioOutChannels; ++c)
 			audioWrite(context, n, c, out);
 	}
