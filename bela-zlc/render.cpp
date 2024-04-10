@@ -146,8 +146,8 @@ void render(BelaContext *context, void *userData)
 		// scale the output mix
 		out = out * powf(10, outGain / 20);
 
-		audioWrite(context, n, 0, out);
-		audioWrite(context, n, 1, out);
+		for(unsigned int c = 0; c < context->audioOutChannels; ++c)
+			audioWrite(context, n, c, out);
 	}
 
 	/* // compute timings (ignore)
