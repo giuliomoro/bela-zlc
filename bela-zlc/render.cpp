@@ -33,12 +33,7 @@ std::vector<std::string> gImpulseFilenames = {
 	"audio/church.wav"};
 
 // zero-latency convolvers
-ZLConvolver zlConvolverA,
-	zlConvolverB,
-	zlConvolverC,
-	zlConvolverD,
-	zlConvolverE,
-	zlConvolverF;
+std::vector<ZLConvolver> gConvolvers;
 
 // Browser-based GUI to adjust parameters
 Gui gGui;
@@ -105,12 +100,11 @@ bool setup(BelaContext *context, void *userData)
 	gOutGainSlider = gGuiController.addSlider("Out gain (dB)", 0.0, -12.0, 12.0, 0.1);
 
 	// setup/configure the zero-latency convolvers
-	zlConvolverA.setup(context->audioFrames, context->audioSampleRate, gImpulseFilenames[0], false, 0);
-	zlConvolverB.setup(context->audioFrames, context->audioSampleRate, gImpulseFilenames[1], false, 0);
-	zlConvolverC.setup(context->audioFrames, context->audioSampleRate, gImpulseFilenames[2], false, 0);
-	zlConvolverD.setup(context->audioFrames, context->audioSampleRate, gImpulseFilenames[3], false, 0);
-	zlConvolverE.setup(context->audioFrames, context->audioSampleRate, gImpulseFilenames[4], false, 0);
-	zlConvolverF.setup(context->audioFrames, context->audioSampleRate, gImpulseFilenames[5], false, 0);
+	// preallocate to avoid
+	// surprises when taking addresses of the elements
+	gConvolvers.reserve(gImpulseFilenames.size());
+	for(size_t n = 0; n < gImpulseFilenames.size(); ++n)
+		gConvolvers.emplace_back(context->audioFrames, context->audioSampleRate, gImpulseFilenames[n], false, 0);
 
 	/* // convolvers for speed testing
 	for (int n = 0; n < blockSize; n++)
@@ -144,31 +138,8 @@ void render(BelaContext *context, void *userData)
 	for (unsigned int n = 0; n < context->audioFrames; n++)
 	{
 
-		float in = gPlayer.process();
-		float out = in * powf(10, inGain / 20);
-
-		switch (room)
-		{
-		case 0: // large_room
-			out = zlConvolverA.process(out, 1.0, 1.0, nl, maxBlocks, sparsity);
-			break;
-		case 1: // drum_room
-			out = zlConvolverB.process(out, 1.0, 1.0, nl, maxBlocks, sparsity);
-			break;
-		case 2: // studio
-			out = zlConvolverC.process(out, 1.0, 1.0, nl, maxBlocks, sparsity);
-			break;
-		case 3: // room
-			out = zlConvolverD.process(out, 1.0, 1.0, nl, maxBlocks, sparsity);
-			break;
-		case 4: // plate
-			out = zlConvolverE.process(out, 1.0, 1.0, nl, maxBlocks, sparsity);
-			break;
-		case 5: // church
-			out = zlConvolverF.process(out, 1.0, 1.0, nl, maxBlocks, sparsity);
-			break;
-		}
-
+		float in = gPlayer.process() * powf(10, inGain / 20);
+		float out = gConvolvers[room].process(in, 1.0, 1.0, nl, maxBlocks, sparsity);
 		// wet dry mix
 		out = out * wet + in * dry;
 
