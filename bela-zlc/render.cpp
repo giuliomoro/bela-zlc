@@ -134,18 +134,18 @@ void render(BelaContext *context, void *userData)
 	float dry = gGuiController.getSliderValue(gDrySlider);
 	float inGain = gGuiController.getSliderValue(gInGainSlider);
 	float outGain = gGuiController.getSliderValue(gOutGainSlider);
+	float inGainLinear = powf(10, inGain / 20);
+	float outGainLinear = powf(10, outGain / 20);
 
 	for (unsigned int n = 0; n < context->audioFrames; n++)
 	{
 
-		float in = gPlayer.process() * powf(10, inGain / 20);
+		float in = gPlayer.process() * inGainLinear;
 		float out = gConvolvers[room].process(in, 1.0, 1.0, nl, maxBlocks, sparsity);
 		// wet dry mix
 		out = out * wet + in * dry;
-
 		// scale the output mix
-		out = out * powf(10, outGain / 20);
-
+		out = out * outGainLinear;
 		for(unsigned int c = 0; c < context->audioOutChannels; ++c)
 			audioWrite(context, n, c, out);
 	}
