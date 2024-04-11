@@ -18,6 +18,7 @@ http://bela.io
 #include <vector>
 #include <string>
 #include <memory>
+#include <libraries/Convolver/Convolver.h>
 
 class DirectConvolver
 {
@@ -35,7 +36,10 @@ public:
 	~DirectConvolver() {}
 
 private:
+	Convolver cv;
 	int k_;					  // block (sample) offset within the complete filter
+	std::vector<float> cvIn;
+	std::vector<float> cvOut;
 	std::vector<float> *x_;	  // pointer to the input circular buffer
 	std::vector<float> *y_;	  // pointer to the output circular buffer
 	std::vector<float> h_;	  // internal copy of the filter coefficients

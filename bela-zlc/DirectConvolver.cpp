@@ -17,31 +17,33 @@ bool DirectConvolver::setup(std::vector<float> &h, int k, std::vector<float> &x,
 	y_ = &y;
 	outPointer_ = k_;
 
-	// load the impulse response block
-	for (int n = 0; n < h.size(); n++)
-	{
-		h_.push_back(h[n]);
-	}
-
-	return true;
+	std::vector<std::vector<float>> hs(1);
+	hs[0]  = h;
+	int ret = cv.setup(hs, h.size());
+	cvIn.reserve(h.size());
+	cvOut.resize(h.size());
+	return !ret;
 }
 
 // Apply the filter h to an input sample in the time domain
 void DirectConvolver::process(unsigned int inPointer)
 {
-	float out = 0;
-
-	// iterate over the coefficients of the filter h
-	for (int i = 0; i < h_.size(); i++)
+	return;
+	// receive one sample at a time and keep a copy
+	cvIn.push_back(x_->data()[inPointer]);
+	if(cvIn.capacity() == cvIn.size())
 	{
-		int circularBufferIndex = (inPointer - i + x_->size()) % x_->size();
-		out += x_->at(circularBufferIndex) * h_[i];
+		// once the buffer is full, perform the convolution for the whole block
+		cv.process(cvOut.data(), cvIn.data(), cvIn.size());
+		cvIn.resize(0);
+		// add the result of the convolution into the output buffer
+		for(size_t n = 0; n < cvOut.size(); ++n)
+		{
+			// write output sample to the output circular buffer
+			int circularBufferIndex = (outPointer_ + y_->size()) % y_->size();
+			y_->data()[circularBufferIndex] += cvOut[n];
+			// update the write pointer one sample ahead
+			outPointer_ = (outPointer_ + 1) % y_->size();
+		}
 	}
-
-	// write output sample to the output circular buffer
-	int circularBufferIndex = (outPointer_ + y_->size()) % y_->size();
-	y_->at(circularBufferIndex) += out;
-
-	// update the write pointer one sample ahead
-	outPointer_ = (outPointer_ + 1) % y_->size();
 }
