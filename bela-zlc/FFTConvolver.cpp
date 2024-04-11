@@ -60,9 +60,16 @@ int FFTConvolver::getFftSize()
 
 void FFTConvolver::queue(unsigned int inPointer, bool bypass)
 {
-	inPointer_ = inPointer;
-	queued_ = true;
-	bypass_ = bypass;
+	bool locked = queueMutex->try_lock();
+	if(locked)
+	{
+		inPointer_ = inPointer;
+		queued_ = true;
+		bypass_ = bypass;
+		queueMutex->unlock();
+	} else {
+		rt_printf("not ready %d\n", idx_);
+	}
 }
 
 // Apply the filter H to an input block x in the frequency domain
@@ -111,6 +118,7 @@ void FFTConvolver::process()
 			int circularBufferIndex = (outPointer_ + n + y_->size()) % y_->size();
 			y_->data()[circularBufferIndex] += fftBuffer->td(n);
 		}
+		queueMutex->unlock();
 	}
 	
 	// update the write pointer (even on bypass)

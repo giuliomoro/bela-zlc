@@ -15,6 +15,7 @@ http://bela.io
 
 #include <libraries/Fft/Fft.h>
 #include <Bela.h>
+#include <RtLock.h>
 #include <vector>
 #include <string>
 #include <memory>
@@ -40,8 +41,7 @@ public:
 	// Process a block
 	void process();
 	
-	// Destructor
-	~FFTConvolver() {}
+	std::shared_ptr<RtMutex> queueMutex = std::make_shared<RtMutex>();
 	
 private:
 	
