@@ -130,7 +130,7 @@ float ZLConvolver::process(float in, int maxBlocks, float sparsity)
 	{
 		// based on the GUI controls we may ignore some blocks in the filter
 		bool bypass = false;
-		if (n % (int)(((1 - sparsity) * (blocks_ / 2)) + 1) == 0 || n > maxBlocks)
+		if ((sparsity && n % (int)(((1 - sparsity) * (blocks_ / 2)) + 1) == 0) || n > maxBlocks)
 			bypass = true;
 
 		// when enough samples are loaded, we will launch the correct convolver threads
