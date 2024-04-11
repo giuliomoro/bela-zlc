@@ -70,13 +70,14 @@ void FFTConvolver::process()
 {
 	if (!bypass_)
 	{
+		queueMutex->lock();
 		// first grab fftsize/2 samples from the input circular buffer 
 		for (int n = 0; n < fftSize_; n++)
 		{
 			if (n < fftSize_/2)
 			{
 				int circularBufferIndex = (inPointer_ + n - (fftSize_/2) + x_->size()) % x_->size();
-				fftX->td(n) = x_->at(circularBufferIndex);
+				fftX->td(n) = x_->data()[circularBufferIndex];
 			}
 			else
 			{
@@ -108,7 +109,7 @@ void FFTConvolver::process()
 		// move the time domain output samples into the output buffer
 		for(int n = 0; n < fftSize_; n++) {
 			int circularBufferIndex = (outPointer_ + n + y_->size()) % y_->size();
-			y_->at(circularBufferIndex) += fftBuffer->td(n);
+			y_->data()[circularBufferIndex] += fftBuffer->td(n);
 		}
 	}
 	
