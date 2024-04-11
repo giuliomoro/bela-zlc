@@ -19,7 +19,6 @@ http://bela.io
 #include <string>
 #include <memory>
 
-#include "MonoFilePlayer.h"
 #include "FFTConvolver.h"
 #include "DirectConvolver.h"
 

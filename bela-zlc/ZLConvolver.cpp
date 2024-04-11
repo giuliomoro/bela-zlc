@@ -1,6 +1,7 @@
 /***** ZLConvolver.cpp *****/
 
 #include "ZLConvolver.h"
+#include <libraries/AudioFile/AudioFile.h>
 
 // Constructor taking the path of a file to load
 ZLConvolver::ZLConvolver(int blockSize, int audioSampleRate, std::string impulseFilename, int maxKernelSize, bool random)
@@ -11,13 +12,14 @@ ZLConvolver::ZLConvolver(int blockSize, int audioSampleRate, std::string impulse
 bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseFilename, int maxKernelSize, bool random)
 {
 	random_ = random;
-	MonoFilePlayer impulsePlayer;
+	std::vector<float> impulsePlayer;
 	int kernelSize = maxKernelSize;
 
 	if (!random)
 	{
 		// Load our impulse response from file
-		if (!impulsePlayer.setup(impulseFilename))
+		impulsePlayer = AudioFileUtilities::loadMono(impulseFilename);
+		if (!impulsePlayer.size())
 		{
 			printf("Error loading impulse response file '%s'\n", impulseFilename.c_str());
 			return false;
@@ -73,12 +75,11 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 			fftSize = (int)powf(2, (blocks_ / 2) - 1) * N_;
 
 		if (!random)
-			value = impulsePlayer.process();
+			value = impulsePlayer[samplesRead++];
 		else
 			value = randFloat(-0.1, 0.1);
 
 		h.push_back(value);
-		samplesRead++;
 
 		// when we read enough samples, create a convolver
 		if ((samplesRead - k) == (fftSize / 2))

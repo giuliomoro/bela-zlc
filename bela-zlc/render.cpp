@@ -11,10 +11,10 @@ Lecture 20: Phase vocoder, part 3 fft-robotisation
 #include <libraries/AudioFile/AudioFile.h>
 #include <libraries/Gui/Gui.h>
 #include <libraries/GuiController/GuiController.h>
-#include "MonoFilePlayer.h"
 #include "DirectConvolver.h"
 #include "FFTConvolver.h"
 #include "ZLConvolver.h"
+#include <libraries/AudioFile/AudioFile.h>
 
 #include <vector>
 #include <cmath>
@@ -22,7 +22,8 @@ Lecture 20: Phase vocoder, part 3 fft-robotisation
 #include <chrono>
 
 // Setup for the impulse response and audio data
-MonoFilePlayer gPlayer;
+std::vector<float> gPlayer;
+size_t gReadPtr;
 std::string gAudioFilename = "audio/riff.wav";
 std::vector<std::string> gImpulseFilenames = {
 	//"audio/large_room.wav",
@@ -71,7 +72,8 @@ DirectConvolver directConvolver;
 bool setup(BelaContext *context, void *userData)
 {
 	// Load the audio file
-	if (!gPlayer.setup(gAudioFilename))
+	gPlayer = AudioFileUtilities::loadMono(gAudioFilename);
+	if (!gPlayer.size())
 	{
 		fprintf(stderr, "Error loading audio file '%s'\n", gAudioFilename.c_str());
 		return false;
@@ -141,7 +143,9 @@ void render(BelaContext *context, void *userData)
 	for (unsigned int n = 0; n < context->audioFrames; n++)
 	{
 
-		float in = gPlayer.process() * inGainLinear;
+		float in = gPlayer[gReadPtr++] * inGainLinear;
+		if(gReadPtr >= gPlayer.size())
+			gReadPtr = 0;
 		float out = gConvolvers[room].process(in, maxBlocks, sparsity);
 		// wet dry mix
 		out = out * wet + in * dry;
