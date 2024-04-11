@@ -40,12 +40,6 @@ GuiController gGuiController;
 unsigned int gRoomSlider;
 unsigned int gMaxBlocksSlider;
 unsigned int gSparsitySlider;
-
-// global variables that track slider states
-int gRoom = 0;
-bool gRandom = 0;
-int gKernelSize = 0;
-
 unsigned int gWetSlider;
 unsigned int gDrySlider;
 unsigned int gTanhSlider;
