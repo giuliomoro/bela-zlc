@@ -1,30 +1,26 @@
-/*
-
-This project is based on the code from:
-Lecture 20: Phase vocoder, part 3 fft-robotisation
-
-*/
-
 #include <Bela.h>
 #include <libraries/Scope/Scope.h>
 #include <libraries/math_neon/math_neon.h>
-#include <libraries/AudioFile/AudioFile.h>
 #include <libraries/Gui/Gui.h>
 #include <libraries/GuiController/GuiController.h>
 #include "DirectConvolver.h"
 #include "FFTConvolver.h"
 #include "ZLConvolver.h"
-#include <libraries/AudioFile/AudioFile.h>
 
 #include <vector>
 #include <cmath>
 #include <cstring>
 #include <chrono>
 
-// Setup for the impulse response and audio data
+#define PLAYBACK
+#ifdef PLAYBACK
+#include <libraries/AudioFile/AudioFile.h>
 std::vector<float> gPlayer;
 size_t gReadPtr;
 std::string gAudioFilename = "audio/riff.wav";
+#endif // PLAYBACK
+
+// Setup for the impulse responses
 std::vector<std::string> gImpulseFilenames = {
 	//"audio/large_room.wav",
 	"audio/drum_room.wav",
@@ -71,6 +67,7 @@ DirectConvolver directConvolver;
 
 bool setup(BelaContext *context, void *userData)
 {
+#ifdef PLAYBACK
 	// Load the audio file
 	gPlayer = AudioFileUtilities::loadMono(gAudioFilename);
 	if (!gPlayer.size())
@@ -83,6 +80,7 @@ bool setup(BelaContext *context, void *userData)
 	printf("Loaded the audio file '%s' with %d frames (%.1f seconds)\n",
 			  gAudioFilename.c_str(), gPlayer.size(),
 			  gPlayer.size() / context->audioSampleRate);
+#endif // PLAYBACK
 
 	// Set up the GUI
 	gGui.setup(context->projectName);
@@ -144,10 +142,11 @@ void render(BelaContext *context, void *userData)
 
 	for (unsigned int n = 0; n < context->audioFrames; n++)
 	{
-
+#ifdef PLAYBACK
 		float in = gPlayer[gReadPtr++] * inGainLinear;
 		if(gReadPtr >= gPlayer.size())
 			gReadPtr = 0;
+#endif // PLAYBACK
 		float out = gConvolvers[room].process(in, maxBlocks, sparsity);
 		// wet dry mix
 		out = out * wet + in * dry;
