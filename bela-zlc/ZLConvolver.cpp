@@ -34,8 +34,19 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 	}
 
 	// Set up the FFT and buffers
-	inputBuffer_.resize(kernelSize);
-	outputBuffer_.resize(kernelSize);
+
+	// N_ = 32 is the smallest N such that
+	// the FFT is faster than the direct form convolution,
+	// but we cannot have it smaller than the blocksize
+	N_ = std::max(32, blockSize);
+
+	// add some latency to give time to the extra threads to
+	// perform their work after being scheduled
+	// TODO: not sure this is the minimum possible value
+	int addedLatency = 2 * N_;
+	inputBuffer_.resize(kernelSize + addedLatency);
+	outputBuffer_.resize(kernelSize + addedLatency);
+	outputBufferReadPointer_ = outputBuffer_.size() - addedLatency;
 
 	// Here we create an array of fftConvolvers
 	// each has a separate block of the impulse response
@@ -43,11 +54,6 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 	int samplesRead = 0;
 	blocks_ = 0;
 	std::vector<float> h;
-
-	// N_ = 32 is the smallest N such that
-	// the FFT is faster than the direct form convolution,
-	// but we cannot have it smaller than the blocksize
-	N_ = std::max(32, blockSize);
 
 	while (samplesRead < kernelSize)
 	{
