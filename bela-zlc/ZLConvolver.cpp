@@ -40,7 +40,7 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 	// N_ = 32 is the smallest N such that
 	// the FFT is faster than the direct form convolution,
 	// but we cannot have it smaller than the blocksize
-	N_ = std::max(32, blockSize);
+	N_ = std::max(32, blockSize * 4);
 
 	// add some latency to give time to the extra threads to
 	// perform their work after being scheduled
@@ -97,7 +97,7 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 				fftConvolvers_.push_back(convolver);
 				convolverBufferSamples_.push_back(0);
 				convolverPriority_.push_back(priority);
-				//printf("n: %d  fftSize: %d. priority: %d samplesRead: %d  k: %d\n", blocks_, fftSize, priority, samplesRead, k);
+				printf("n: %d  fftSize: %d. priority: %d samplesRead: %d  k: %d\n", blocks_, fftSize, priority, samplesRead, k);
 			}
 
 			blocks_++;
@@ -133,10 +133,10 @@ float ZLConvolver::process(float in, int maxBlocks, float sparsity)
 	}
 
 	// direct convolution
-	directConvolver_.process(inputBufferPointer_);
+	//directConvolver_.process(inputBufferPointer_);
 
 	// iterate over FFT convolutions
-	for (int n = 0; n < fftConvolvers_.size(); n++)
+	for (int n = 2; n < fftConvolvers_.size(); n++)
 	{
 		// based on the GUI controls we may ignore some blocks in the filter
 		bool bypass = false;
