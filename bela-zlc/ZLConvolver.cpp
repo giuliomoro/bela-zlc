@@ -24,10 +24,15 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 
 		// Print some useful info
 		printf("Loaded the impulse response file '%s' with %d frames (%.1f seconds)\n",
-				  impulseFilename.c_str(), impulsePlayer.size(),
-				  impulsePlayer.size() / float(audioSampleRate));
+				  impulseFilename.c_str(), kernelSize,
+				  kernelSize/ float(audioSampleRate));
 
-		kernelSize = impulsePlayer.size();
+		int sz = impulsePlayer.size();
+		if(kernelSize)
+			kernelSize = std::min(kernelSize, sz);
+		else
+			kernelSize = sz;
+
 	}
 
 	// Set up the FFT and buffers
