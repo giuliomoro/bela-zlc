@@ -41,9 +41,10 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 	blocks_ = 0;
 	std::vector<float> h;
 
-	N_ = 32;
-	// we select N to be the smallest N such that
-	// the FFT is faster than the direct form convolution
+	// N_ = 32 is the smallest N such that
+	// the FFT is faster than the direct form convolution,
+	// but we cannot have it smaller than the blocksize
+	N_ = std::max(32, blockSize);
 
 	while (samplesRead < kernelSize)
 	{
