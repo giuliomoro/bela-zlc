@@ -2,6 +2,9 @@
 
 #include "FFTConvolver.h"
 
+#define CHECK_WRITE_MUTEX
+#define LOCK_WRITE_MUTEX
+#define LOCK_QUEUE_MUTEX
 RtMutex FFTConvolver::writeMutex;
 
 // Constructor taking the path of a file to load
@@ -60,13 +63,18 @@ int FFTConvolver::getFftSize()
 
 void FFTConvolver::queue(unsigned int inPointer, bool bypass)
 {
-	bool locked = queueMutex->try_lock();
-	if(locked)
+#ifdef LOCK_QUEUE_MUTEX
+	if(queueMutex->try_lock())
+#else
+	if(!isQueued()) // softer check
+#endif // LOCK_QUEUE_MUTEX
 	{
 		inPointer_ = inPointer;
 		queued_ = true;
 		bypass_ = bypass;
+#ifdef LOCK_QUEUE_MUTEX
 		queueMutex->unlock();
+#endif // LOCK_QUEUE_MUTEX
 	} else {
 		rt_printf("not ready %d\n", idx_);
 	}
@@ -77,7 +85,9 @@ void FFTConvolver::process()
 {
 	if (!bypass_)
 	{
+#ifdef LOCK_QUEUE_MUTEX
 		queueMutex->lock();
+#endif // LOCK_QUEUE_MUTEX
 		// first grab fftsize/2 samples from the input circular buffer 
 		for (int n = 0; n < fftSize_; n++)
 		{
@@ -114,13 +124,27 @@ void FFTConvolver::process()
 		fftBuffer->ifft();
 		
 		// move the time domain output samples into the output buffer
+#ifdef LOCK_WRITE_MUTEX
+#ifdef CHECK_WRITE_MUTEX
+		bool locked = writeMutex.try_lock();
+		if(!locked) {
+			rt_printf("waiting to lock writeMutex %d\n", idx_);
+			writeMutex.lock();
+		}
+#else
 		writeMutex.lock();
+#endif
+#endif // LOCK_WRITE_MUTEX
 		for(int n = 0; n < fftSize_; n++) {
 			int circularBufferIndex = (outPointer_ + n + y_->size()) % y_->size();
 			y_->data()[circularBufferIndex] += fftBuffer->td(n);
 		}
+#ifdef LOCK_WRITE_MUTEX
 		writeMutex.unlock();
+#endif // LOCK_WRITE_MUTEX
+#ifdef LOCK_QUEUE_MUTEX
 		queueMutex->unlock();
+#endif // LOCK_QUEUE_MUTEX
 	}
 	
 	// update the write pointer (even on bypass)
