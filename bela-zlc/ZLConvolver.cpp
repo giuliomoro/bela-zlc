@@ -3,15 +3,16 @@
 #include "ZLConvolver.h"
 
 // Constructor taking the path of a file to load
-ZLConvolver::ZLConvolver(int blockSize, int audioSampleRate, std::string impulseFilename, bool random, int kernelSize)
+ZLConvolver::ZLConvolver(int blockSize, int audioSampleRate, std::string impulseFilename, int maxKernelSize, bool random)
 {
-	setup(blockSize, audioSampleRate, impulseFilename, random, kernelSize);
+	setup(blockSize, audioSampleRate, impulseFilename, maxKernelSize, random);
 }
 
-bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseFilename, bool random, int kernelSize)
+bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseFilename, int maxKernelSize, bool random)
 {
 	random_ = random;
 	MonoFilePlayer impulsePlayer;
+	int kernelSize = maxKernelSize;
 
 	if (!random)
 	{
@@ -21,17 +22,14 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 			printf("Error loading impulse response file '%s'\n", impulseFilename.c_str());
 			return false;
 		}
+		kernelSize = impulsePlayer.size();
+		if(maxKernelSize)
+			kernelSize = std::min(kernelSize, maxKernelSize);
 
 		// Print some useful info
 		printf("Loaded the impulse response file '%s' with %d frames (%.1f seconds)\n",
 				  impulseFilename.c_str(), kernelSize,
 				  kernelSize/ float(audioSampleRate));
-
-		int sz = impulsePlayer.size();
-		if(kernelSize)
-			kernelSize = std::min(kernelSize, sz);
-		else
-			kernelSize = sz;
 
 	}
 

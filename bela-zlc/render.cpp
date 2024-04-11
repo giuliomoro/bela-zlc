@@ -105,7 +105,7 @@ bool setup(BelaContext *context, void *userData)
 	// surprises when taking addresses of the elements
 	gConvolvers.reserve(gImpulseFilenames.size());
 	for(size_t n = 0; n < gImpulseFilenames.size(); ++n)
-		gConvolvers.emplace_back(context->audioFrames, context->audioSampleRate, gImpulseFilenames[n], false, 0);
+		gConvolvers.emplace_back(context->audioFrames, context->audioSampleRate, gImpulseFilenames[n]);
 
 	/* // convolvers for speed testing
 	for (int n = 0; n < blockSize; n++)

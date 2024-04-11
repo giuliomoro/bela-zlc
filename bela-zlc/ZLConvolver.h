@@ -27,10 +27,10 @@ class ZLConvolver {
 public:
 	// Constructors: the one with arguments automatically calls setup()
 	ZLConvolver() {}
-	ZLConvolver(int blockSize, int audioSampleRate, std::string impulseFilename, bool random, int kernelSize);
+	ZLConvolver(int blockSize, int audioSampleRate, std::string impulseFilename, int maxKernelSize = 0, bool random = false);
 	
 	// Create a zero-latency convolver. Returns true on success.
-	bool setup(int blockSize, int audioSampleRate, std::string impulseFilename, bool random, int kernelSize);
+	bool setup(int blockSize, int audioSampleRate, std::string impulseFilename, int maxKernelSize = 0, bool random = false);
 	
 	// After passing pointer to convolver, launch the convolver
 	static void convolverLauncher(void * convolverPtr)
