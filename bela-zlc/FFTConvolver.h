@@ -49,7 +49,7 @@ private:
 	// FFT objects
 	std::shared_ptr<Fft> fftBuffer, fftH, fftX;
 	
-	bool queued_;			// whether the filter block samples are ready
+	bool queued_ = false;		// whether the filter block samples are ready
 	int fftSize_;			// size of the fft with h = fftSize/2
 	int k_;			 		// block (sample) offset within the complete filter
 	int idx_;
