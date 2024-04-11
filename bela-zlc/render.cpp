@@ -13,6 +13,8 @@
 #include <chrono>
 
 #define PLAYBACK
+#define MULTICHANNEL
+
 #ifdef PLAYBACK
 #include <libraries/AudioFile/AudioFile.h>
 std::vector<float> gPlayer;
@@ -59,6 +61,8 @@ FFTConvolver fftConvolver;
 DirectConvolver directConvolver;
 */
 
+size_t gNumChannels;
+
 bool setup(BelaContext *context, void *userData)
 {
 #ifdef PLAYBACK
@@ -74,7 +78,17 @@ bool setup(BelaContext *context, void *userData)
 	printf("Loaded the audio file '%s' with %d frames (%.1f seconds)\n",
 			  gAudioFilename.c_str(), gPlayer.size(),
 			  gPlayer.size() / context->audioSampleRate);
+	gNumChannels = context->audioOutChannels;
+#else // PLAYBACK
+	gNumChannels = std::min(context->audioInChannels, context->audioOutChannels);
 #endif // PLAYBACK
+#ifdef MULTICHANNEL
+	if(gImpulseFilenames.size() < gNumChannels)
+	{
+		fprintf(stderr, "You need as many IRs as you have channels\n");
+		return false;
+	}
+#endif // MULTICHANNEL
 
 	// Set up the GUI
 	gGui.setup(context->projectName);
@@ -136,21 +150,33 @@ void render(BelaContext *context, void *userData)
 
 	for (unsigned int n = 0; n < context->audioFrames; n++)
 	{
+		float out;
+		for(unsigned int c = 0; c < gNumChannels; ++c)
+		{
 #ifdef PLAYBACK
-		float in = gPlayer[gReadPtr++] * inGainLinear;
-		if(gReadPtr >= gPlayer.size())
+			float in = gPlayer[gReadPtr] * inGainLinear;
+#else
+			float in = audioRead(context, n, c);
+#endif // PLAYBACK
+#ifdef MULTICHANNEL
+			out = gConvolvers[c].process(in, maxBlocks, sparsity);
+#else // MULTICHANNEL
+			if(0 == c)
+				out = gConvolvers[room].process(in, maxBlocks, sparsity);
+#endif // MULTICHANNEL
+			// wet dry mix
+			out = out * wet + in * dry;
+			// scale the output mix
+			out = out * outGainLinear;
+			// apply nonlinearity
+			if(nl)
+				out = tanhf_neon(out);
+			audioWrite(context, n, c, out);
+		}
+#ifdef PLAYBACK
+		if(++gReadPtr >= gPlayer.size())
 			gReadPtr = 0;
 #endif // PLAYBACK
-		float out = gConvolvers[room].process(in, maxBlocks, sparsity);
-		// wet dry mix
-		out = out * wet + in * dry;
-		// scale the output mix
-		out = out * outGainLinear;
-		// apply nonlinearity
-		if(nl)
-			out = tanhf_neon(out);
-		for(unsigned int c = 0; c < context->audioOutChannels; ++c)
-			audioWrite(context, n, c, out);
 	}
 
 	/* // compute timings (ignore)
