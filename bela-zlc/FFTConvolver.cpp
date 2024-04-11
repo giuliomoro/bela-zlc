@@ -2,23 +2,26 @@
 
 #include "FFTConvolver.h"
 
+RtMutex FFTConvolver::writeMutex;
+
 // Constructor taking the path of a file to load
-FFTConvolver::FFTConvolver(int fftSize, std::vector<float>& h, int k, std::vector<float>& x, std::vector<float>& y)
+FFTConvolver::FFTConvolver(int fftSize, std::vector<float>& h, int k, std::vector<float>& x, std::vector<float>& y, int idx)
 {
 	// FFT size must always be twice as large as block of samples
 	assert (fftSize == 2 * h.size()); 
 	
-	setup(fftSize, h, k, x, y);	
+	setup(fftSize, h, k, x, y, idx);
 }
 
 // Load an audio file from the given filename. Returns true on success.
-bool FFTConvolver::setup(int fftSize, std::vector<float>& h, int k, std::vector<float>& x, std::vector<float>& y)
+bool FFTConvolver::setup(int fftSize, std::vector<float>& h, int k, std::vector<float>& x, std::vector<float>& y, int idx)
 {
 	// store public member values
 	fftSize_ = fftSize;
 	k_ = k;
 	x_ = &x;
 	y_ = &y;
+	idx_ = idx;
 	outPointer_ = k_;
 
 	// setup the FFT objects

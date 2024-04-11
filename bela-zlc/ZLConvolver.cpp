@@ -82,7 +82,7 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 			else
 			{
 				// Note: actual FFT size is always twice as large as block size
-				FFTConvolver convolver(fftSize, h, k, inputBuffer_, outputBuffer_);
+				FFTConvolver convolver(fftSize, h, k, inputBuffer_, outputBuffer_, priority);
 				fftConvolvers_.push_back(convolver);
 				convolverBufferSamples_.push_back(0);
 				convolverPriority_.push_back(priority);

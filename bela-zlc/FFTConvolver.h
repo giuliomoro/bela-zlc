@@ -23,10 +23,10 @@ class FFTConvolver {
 public:
 	// Constructors: the one with arguments automatically calls setup()
 	FFTConvolver() {}
-	FFTConvolver(int fftSize, std::vector<float>& h, int k, std::vector<float>& x, std::vector<float>& y);
+	FFTConvolver(int fftSize, std::vector<float>& h, int k, std::vector<float>& x, std::vector<float>& y, int idx);
 	
 	// Load an audio file from the given filename. Returns true on success.
-	bool setup(int fftSize, std::vector<float>& h, int k, std::vector<float>& x, std::vector<float>& y);
+	bool setup(int fftSize, std::vector<float>& h, int k, std::vector<float>& x, std::vector<float>& y, int idx);
 	
 	// check if the convolver has been queued
 	bool isQueued(void);
@@ -51,6 +51,7 @@ private:
 	bool queued_;			// whether the filter block samples are ready
 	int fftSize_;			// size of the fft with h = fftSize/2
 	int k_;			 		// block (sample) offset within the complete filter
+	int idx_;
 	bool bypass_;			// do not process, but update the write pointer
 	
 	std::vector<float>* x_;		// pointer to input circular buffer
