@@ -56,7 +56,7 @@ private:
 	// FFT
 	int N_; 									// base FFT size
 	int blocks_;								// number of blocks for impulse (number of fftConvolvers)
-	int basePriority_ = 90;						// base thread priority
+	int basePriority_ = BELA_AUDIO_PRIORITY - 1; // base thread priority
 	std::vector<FFTConvolver> fftConvolvers_;	// array of fftConvolvers
 	DirectConvolver directConvolver_;			// single direct convolution for zero latency
 	std::vector<int> convolverBufferSamples_;	// array of number of samples since last call for each convolver

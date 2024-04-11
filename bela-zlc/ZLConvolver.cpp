@@ -73,7 +73,7 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 		// when we read enough samples, create a convolver
 		if ((samplesRead - k) == (fftSize / 2))
 		{
-			int priority = (int)basePriority_ - (3 * blocks_);
+			int priority = (int)basePriority_ - (blocks_);
 
 			if (direct)
 			{
