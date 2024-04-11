@@ -64,7 +64,6 @@ private:
 	std::vector<int> convolverPriority_;		// array of priority values for each convolver thread
 
 	// Input and Output circular buffers
-	const int bufferSize_ = 131072;
 	std::vector<float> inputBuffer_;
 	int inputBufferPointer_ = 0;
 	std::vector<float> outputBuffer_;

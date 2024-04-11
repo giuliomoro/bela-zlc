@@ -34,8 +34,8 @@ bool ZLConvolver::setup(int blockSize, int audioSampleRate, std::string impulseF
 	}
 
 	// Set up the FFT and buffers
-	inputBuffer_.resize(bufferSize_);
-	outputBuffer_.resize(bufferSize_);
+	inputBuffer_.resize(kernelSize);
+	outputBuffer_.resize(kernelSize);
 
 	// Here we create an array of fftConvolvers
 	// each has a separate block of the impulse response
@@ -120,7 +120,7 @@ float ZLConvolver::process(float in, int maxBlocks, float sparsity)
 {
 	// store input sample into input circular buffer
 	inputBuffer_[inputBufferPointer_++] = in;
-	if (inputBufferPointer_ >= bufferSize_)
+	if (inputBufferPointer_ >= inputBuffer_.size())
 	{
 		inputBufferPointer_ = 0;
 	}
@@ -155,7 +155,7 @@ float ZLConvolver::process(float in, int maxBlocks, float sparsity)
 
 	// Increment the read pointer in the output circular buffer
 	outputBufferReadPointer_++;
-	if (outputBufferReadPointer_ >= bufferSize_)
+	if (outputBufferReadPointer_ >= outputBuffer_.size())
 		outputBufferReadPointer_ = 0;
 
 	return out;
