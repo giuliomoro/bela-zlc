@@ -41,6 +41,7 @@ public:
 	// Process a block
 	void process();
 	
+	static RtMutex writeMutex;
 	std::shared_ptr<RtMutex> queueMutex = std::make_shared<RtMutex>();
 	
 private:

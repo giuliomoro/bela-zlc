@@ -145,7 +145,9 @@ float ZLConvolver::process(float in, int maxBlocks, float sparsity)
 	float out = outputBuffer_[outputBufferReadPointer_];
 
 	// Then clear the output sample in the buffer so it is ready for the next overlap-add
+	//FFTConvolver::writeMutex.lock(); // TODO: may block and cause priority inversion
 	outputBuffer_[outputBufferReadPointer_] = 0;
+	//FFTConvolver::writeMutex.unlock();
 
 	// Increment the read pointer in the output circular buffer
 	outputBufferReadPointer_++;

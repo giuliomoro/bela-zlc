@@ -114,10 +114,12 @@ void FFTConvolver::process()
 		fftBuffer->ifft();
 		
 		// move the time domain output samples into the output buffer
+		writeMutex.lock();
 		for(int n = 0; n < fftSize_; n++) {
 			int circularBufferIndex = (outPointer_ + n + y_->size()) % y_->size();
 			y_->data()[circularBufferIndex] += fftBuffer->td(n);
 		}
+		writeMutex.unlock();
 		queueMutex->unlock();
 	}
 	
